@@ -1,0 +1,9 @@
+*.zip
+node_modules/
+.env
+.env.*
+qa/screens/
+# the original's release assets stay outside the repo (see NOTICE)
+CharCard.json
+*.lingling.png
+*.lumiverse.json

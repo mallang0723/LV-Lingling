@@ -1,0 +1,43 @@
+령령의 제작실 (Lumiverse) — 원저작물 고지 / Attribution notice
+
+원작: 령령의 마리나라 제작실 (Lingling Studio for Marinara) by you2-use
+Original: "령령의 마리나라 제작실" v2.0.0 by you2-use — https://github.com/you2-use/lingling-studio
+Source revision used: commit 81abb4d (main), release v2.0.0 (Marinara Engine v2.5.0 용)
+  extension.js    sha256 cb695b894421243db0c38f723f76f1d7fa673bb3cdd0c6776c5a4b59b5fe8486
+  CharCard.json   sha256 825b5b1650a9151c49534881b61201b0e7ef05b090dad2a6e9095de10bc851c7   (release asset; 령령 봇카드)
+  LinglingImage.zip sha256 2bcc078df3b1f8786ce813ba4ae276386079c3a18f743b74c198223721631ea9 (release asset; 령령 추가 이미지 38장)
+  (릴리스의 SHA256SUMS.txt 는 카드 파일을 옛 이름 CharacterCard.json 으로 적고 있어 CharCard.json 과 해시가 맞지 않습니다.
+   위 값은 GitHub 가 CharCard.json 에 붙인 digest 와 같습니다.)
+
+원작 저장소에는 라이선스 파일이 없습니다. 따라서 이 이식판은 개인 사용만을 위한 것이며,
+재배포·공개·판매하지 않습니다. 비공개 저장소에만 둡니다.
+The original repository has no license file. All rights to the original remain with its author.
+This port is for personal use only and must not be redistributed or published.
+
+이 저장소는 위 원작을 Lumiverse 1.2.5 Spindle 확장으로 옮긴 비공식 개인 이식판입니다.
+원작자 you2-use 및 Lumiverse, Marinara 와 관계가 없고, 원작에 대한 소유권이나 저작권을 주장하지 않습니다.
+This is an unofficial personal port. It is not affiliated with or endorsed by the original
+author, Lumiverse or Marinara, and makes no ownership claim over the original work.
+
+원작에서 옮긴 부분 / Material taken from the original:
+- src/original/logic.js: 원작 extension.js 의 로직 구간(응답 패킷 해석, 캐릭터·페르소나·로어북 요청문(브리핑·최종본·부분 수정),
+  출력 계약, 매크로 보호 표식, 외부 자료·팬덤 위키 수집, 초안 비교, 토큰 추정, 로어북 저장 절차)을 그대로 옮김.
+  식별자도 원작 번들의 것 그대로이며(원작이 번들로만 배포됨), 호스트(Marinara)의 DOM·REST 를 읽는 구간만 뺐음.
+  Logic section of the original bundle copied as-is (packet parsers, prompt/contract text, macro protection, external
+  material collection, diffing, token estimate, lorebook save journal); only the host-bound DOM / REST parts were left out.
+- src/original/ui.js: 원작의 화면 조각(DOM 빌더: 단계 탭, 필드 편집, 로어북 화면)과 한국어 문구. "LV:" 주석이 붙은 줄만 이식 때 고침
+  (마리나라 → 루미버스 문구, 입력창에 넣기 버튼 표시 조건).
+  DOM builders and Korean UI text of the original; only lines marked "LV:" were changed.
+- src/controller.js, src/service.js, src/mapping.js 등: 원작의 흐름(요청 보내기 → 마지막 답변 가져오기 → 편집 → 저장,
+  상시 주입, 임시 저장)을 Lumiverse API 에 맞게 다시 쓴 것. 원작 코드를 옮긴 것이 아니라 동작을 따라 쓴 것임.
+  Re-implemented against the Lumiverse API following the original's behaviour.
+- src/style.js: 원작 CSS 를 쓰지 않고 새로 씀(원작 클래스 이름 mcs-* 만 같음).
+- assets/: LinglingImage.zip(원작 릴리스 동봉 령령 이미지, 같은 원작자의 릴리스)의 령령1.png 를 줄인 사본. 개인·비공개 사용.
+  A downscaled copy of one image from the original author's LinglingImage.zip release asset (personal, private use).
+- 령령 봇카드(CharCard.json)와 이미지 ZIP 전체는 이 저장소에 넣지 않았습니다. 사용자가 원작 릴리스에서 직접 받습니다.
+  The bot card and the full image zip are NOT stored in this repository.
+
+원작 코드는 표준 도구(prettier --print-width 140)로 줄바꿈만 정리한 뒤 줄 단위로 옮겼고,
+scripts/verify-original.mjs 로 원작(정리본)과 줄 단위로 대조할 수 있습니다.
+
+Lumiverse 호스트 소스는 포함하지 않습니다. No Lumiverse source code is included.
