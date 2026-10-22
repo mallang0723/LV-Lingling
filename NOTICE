@@ -9,10 +9,12 @@ Source revision used: commit 81abb4d (main), release v2.0.0 (Marinara Engine v2.
   (릴리스의 SHA256SUMS.txt 는 카드 파일을 옛 이름 CharacterCard.json 으로 적고 있어 CharCard.json 과 해시가 맞지 않습니다.
    위 값은 GitHub 가 CharCard.json 에 붙인 digest 와 같습니다.)
 
-원작 저장소에는 라이선스 파일이 없습니다. 따라서 이 이식판은 개인 사용만을 위한 것이며,
-재배포·공개·판매하지 않습니다. 비공개 저장소에만 둡니다.
-The original repository has no license file. All rights to the original remain with its author.
-This port is for personal use only and must not be redistributed or published.
+원작 저장소에는 LICENSE 파일이 없습니다(원작자가 그렇게 두고 있음). 대신 원작자가 DCInside aifrontend 마이너 갤러리 게시글
+"[시리즈] 말랑나라 제작 도우미 봇카드"에서 GitHub 링크를 "(수정/재배포 가능)"이라고 밝혔고, 이 이식판은 그 허락에 따라 수정·공개합니다.
+이 저장소는 원작 부분에 대해 별도의 라이선스를 만들거나 부여하지 않으며, 원작에 대한 모든 권리는 원작자에게 있습니다.
+The original repository has no LICENSE file. The author stated in their DCInside post (aifrontend minor gallery,
+"[시리즈] 말랑나라 제작 도우미 봇카드") that the GitHub link may be modified and redistributed ("수정/재배포 가능"); this port is
+published on that basis. No license is invented or granted here for the original's parts; all rights to the original remain with its author.
 
 이 저장소는 위 원작을 Lumiverse 1.2.5 Spindle 확장으로 옮긴 비공식 개인 이식판입니다.
 원작자 you2-use 및 Lumiverse, Marinara 와 관계가 없고, 원작에 대한 소유권이나 저작권을 주장하지 않습니다.
@@ -32,10 +34,10 @@ author, Lumiverse or Marinara, and makes no ownership claim over the original wo
   상시 주입, 임시 저장)을 Lumiverse API 에 맞게 다시 쓴 것. 원작 코드를 옮긴 것이 아니라 동작을 따라 쓴 것임.
   Re-implemented against the Lumiverse API following the original's behaviour.
 - src/style.js: 원작 CSS 를 쓰지 않고 새로 씀(원작 클래스 이름 mcs-* 만 같음).
-- assets/: LinglingImage.zip(원작 릴리스 동봉 령령 이미지, 같은 원작자의 릴리스)의 령령1.png 를 줄인 사본. 개인·비공개 사용.
-  A downscaled copy of one image from the original author's LinglingImage.zip release asset (personal, private use).
-- 령령 봇카드(CharCard.json)와 이미지 ZIP 전체는 이 저장소에 넣지 않았습니다. 사용자가 원작 릴리스에서 직접 받습니다.
-  The bot card and the full image zip are NOT stored in this repository.
+- assets/: 원작 릴리스(v2.0.0)의 LinglingImage.zip 에 든 령령1.png 를 작게 줄인 사본 1장(같은 원작자의 릴리스 자료). 없어도 동작하며
+  원작의 유령 SVG 아이콘으로 대체됩니다. A downscaled copy of one image from the original release's LinglingImage.zip.
+- 령령 봇카드(CharCard.json)와 이미지 ZIP 전체는 이 저장소에 넣지 않았습니다. 원작 릴리스 링크에서 직접 받습니다.
+  The bot card and the full image zip are NOT stored in this repository; get them from the original release.
 
 원작 코드는 표준 도구(prettier --print-width 140)로 줄바꿈만 정리한 뒤 줄 단위로 옮겼고,
 scripts/verify-original.mjs 로 원작(정리본)과 줄 단위로 대조할 수 있습니다.
