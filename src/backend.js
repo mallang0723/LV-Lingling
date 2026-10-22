@@ -13,7 +13,7 @@ export function start(api) {
         try { api.sendToFrontend({ ...reply, requestId: payload.requestId }, userId, frontendSessionId ? { frontendSessionId } : undefined); } catch { /* frontend gone */ }
     });
     let offPerm = null;
-    try { offPerm = api.permissions?.onChanged?.(() => service.onPermissionChanged()); } catch { /* optional */ }
+    try { offPerm = api.permissions?.onChanged?.(detail => service.onPermissionChanged(detail)); } catch { /* optional */ }
     service.attach();
     return () => { service.stop(); offMessage?.(); try { offPerm?.(); } catch { /* ignore */ } try { release?.(); } catch { /* ignore */ } };
 }

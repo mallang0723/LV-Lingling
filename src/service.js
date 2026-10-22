@@ -89,7 +89,7 @@ export function createService(api) {
         const msgs = await api.chat.getMessages(chatId);
         const last = Array.isArray(msgs) && msgs.length ? msgs[msgs.length - 1] : null;
         return {
-            chatId, generating: generating.has(chatId),
+            chatId, generating: isGenerating(chatId),
             message: last ? { id: String(last.id), role: String(last.role || ''), content: typeof last.content === 'string' ? last.content : '', createdAt: last.created_at ?? last.send_date ?? '' } : null,
         };
     }
@@ -99,11 +99,12 @@ export function createService(api) {
         await ownedChat(user, chatId);
         const text = String(req.text || '').trim();
         if (!text) throw new Error('RP방에 넣을 내용이 없습니다.');
-        if (generating.has(chatId)) throw new Error('령령의 답변 생성이 끝난 뒤 요청해 주세요.');
+        if (isGenerating(chatId)) throw new Error('령령의 답변 생성이 끝난 뒤 요청해 주세요.');
         const s = await readSettings(user);
         const options = { triggerGeneration: true, ...(s.connectionId ? { generation: { connection_id: s.connectionId } } : {}) };
+        ensureTracking();
         const sent = await api.chat.appendMessage(chatId, { role: 'user', content: wrapRequest(text), metadata: { source: MESSAGE_SOURCE, kind: String(req.kind || '') } }, options);
-        if (sent?.generationId) generating.set(chatId, sent.generationId);
+        if (sent?.generationId) generating.set(chatId, { id: sent.generationId, at: Date.now() });
         return { id: sent?.id || null, generationId: sent?.generationId || null };
     }
 
@@ -114,18 +115,31 @@ export function createService(api) {
         return payload => {
             const chatId = payload?.chatId;
             if (!chatId) return;
-            if (event === 'started') generating.set(chatId, payload.generationId || '1');
+            if (event === 'started') generating.set(chatId, { id: payload.generationId || '1', at: Date.now() });
             else generating.delete(chatId);
             broadcast({ event: 'generation', chatId, state: event === 'ended' && payload.error ? 'error' : event, error: payload?.error || '' });
         };
     }
+    // A generation this old is not in flight any more (the host caps a reply far below this): never lock the chat forever
+    const STALE_MS = 10 * 60 * 1000;
+    function isGenerating(chatId) {
+        const g = generating.get(chatId);
+        if (!g) return false;
+        if (Date.now() - g.at > STALE_MS) { generating.delete(chatId); return false; }
+        return true;
+    }
     const offs = [];
-    function attach() {
-        if (typeof api.on === 'function') {
-            for (const [name, event] of [['GENERATION_STARTED', 'started'], ['GENERATION_ENDED', 'ended'], ['GENERATION_STOPPED', 'stopped']]) {
-                try { const off = api.on(name, track(event)); if (typeof off === 'function') offs.push(off); } catch { /* no generation permission yet */ }
-            }
+    /** The host refuses these subscriptions silently while `generation` is not granted, so they are redone when it is. */
+    function subscribe() {
+        for (const off of offs.splice(0)) { try { off(); } catch { /* ignore */ } }
+        if (typeof api.on !== 'function' || !has('generation')) return;
+        for (const [name, event] of [['GENERATION_STARTED', 'started'], ['GENERATION_ENDED', 'ended'], ['GENERATION_STOPPED', 'stopped']]) {
+            try { const off = api.on(name, track(event)); if (typeof off === 'function') offs.push(off); } catch { /* not allowed yet */ }
         }
+    }
+    function ensureTracking() { if (!offs.length) subscribe(); }
+    function attach() {
+        subscribe();
         registerInterceptor();
     }
     let interceptorOff = null;
@@ -139,7 +153,10 @@ export function createService(api) {
             } catch { return messages; }
         }, 100);
     }
-    function onPermissionChanged() { registerInterceptor(); }
+    function onPermissionChanged(detail) {
+        registerInterceptor();
+        if (!detail || detail.permission === 'generation') subscribe();
+    }
     function setInjection(user, req) {
         if (!req.chatId) { injections.delete(user); return { active: false }; }
         if (!validId(req.chatId)) throw new Error('잘못된 채팅');
@@ -295,7 +312,7 @@ export function createService(api) {
         switch (req?.type) {
             case 'bootstrap': return {
                 perms: Object.fromEntries(PERMS.map(p => [p, has(p)])), chat: await activeChat(user), connections: await connections(user),
-                settings: await readSettings(user), generating: [...generating.keys()], health: { status: 'ok' },
+                settings: await readSettings(user), generating: [...generating.keys()].filter(isGenerating), health: { status: 'ok' },
             };
             case 'chat': return { chat: await activeChat(user) };
             case 'characters': return { list: await characters(user) };

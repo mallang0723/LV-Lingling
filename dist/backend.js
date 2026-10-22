@@ -307,7 +307,7 @@ function createService(api) {
     const last = Array.isArray(msgs) && msgs.length ? msgs[msgs.length - 1] : null;
     return {
       chatId,
-      generating: generating.has(chatId),
+      generating: isGenerating(chatId),
       message: last ? { id: String(last.id), role: String(last.role || ""), content: typeof last.content === "string" ? last.content : "", createdAt: last.created_at ?? last.send_date ?? "" } : null
     };
   }
@@ -318,13 +318,14 @@ function createService(api) {
     const text = String(req.text || "").trim();
     if (!text)
       throw new Error("RP\uBC29\uC5D0 \uB123\uC744 \uB0B4\uC6A9\uC774 \uC5C6\uC2B5\uB2C8\uB2E4.");
-    if (generating.has(chatId))
+    if (isGenerating(chatId))
       throw new Error("\uB839\uB839\uC758 \uB2F5\uBCC0 \uC0DD\uC131\uC774 \uB05D\uB09C \uB4A4 \uC694\uCCAD\uD574 \uC8FC\uC138\uC694.");
     const s = await readSettings(user);
     const options = { triggerGeneration: true, ...s.connectionId ? { generation: { connection_id: s.connectionId } } : {} };
+    ensureTracking();
     const sent = await api.chat.appendMessage(chatId, { role: "user", content: wrapRequest(text), metadata: { source: MESSAGE_SOURCE, kind: String(req.kind || "") } }, options);
     if (sent?.generationId)
-      generating.set(chatId, sent.generationId);
+      generating.set(chatId, { id: sent.generationId, at: Date.now() });
     return { id: sent?.id || null, generationId: sent?.generationId || null };
   }
   const emit = (user, msg) => {
@@ -342,23 +343,46 @@ function createService(api) {
       if (!chatId)
         return;
       if (event === "started")
-        generating.set(chatId, payload.generationId || "1");
+        generating.set(chatId, { id: payload.generationId || "1", at: Date.now() });
       else
         generating.delete(chatId);
       broadcast({ event: "generation", chatId, state: event === "ended" && payload.error ? "error" : event, error: payload?.error || "" });
     };
   }
-  const offs = [];
-  function attach() {
-    if (typeof api.on === "function") {
-      for (const [name, event] of [["GENERATION_STARTED", "started"], ["GENERATION_ENDED", "ended"], ["GENERATION_STOPPED", "stopped"]]) {
-        try {
-          const off = api.on(name, track(event));
-          if (typeof off === "function")
-            offs.push(off);
-        } catch {}
-      }
+  const STALE_MS = 10 * 60 * 1000;
+  function isGenerating(chatId) {
+    const g = generating.get(chatId);
+    if (!g)
+      return false;
+    if (Date.now() - g.at > STALE_MS) {
+      generating.delete(chatId);
+      return false;
     }
+    return true;
+  }
+  const offs = [];
+  function subscribe() {
+    for (const off of offs.splice(0)) {
+      try {
+        off();
+      } catch {}
+    }
+    if (typeof api.on !== "function" || !has("generation"))
+      return;
+    for (const [name, event] of [["GENERATION_STARTED", "started"], ["GENERATION_ENDED", "ended"], ["GENERATION_STOPPED", "stopped"]]) {
+      try {
+        const off = api.on(name, track(event));
+        if (typeof off === "function")
+          offs.push(off);
+      } catch {}
+    }
+  }
+  function ensureTracking() {
+    if (!offs.length)
+      subscribe();
+  }
+  function attach() {
+    subscribe();
     registerInterceptor();
   }
   let interceptorOff = null;
@@ -375,8 +399,10 @@ function createService(api) {
       }
     }, 100);
   }
-  function onPermissionChanged() {
+  function onPermissionChanged(detail) {
     registerInterceptor();
+    if (!detail || detail.permission === "generation")
+      subscribe();
   }
   function setInjection(user, req) {
     if (!req.chatId) {
@@ -552,7 +578,7 @@ function createService(api) {
           chat: await activeChat(user),
           connections: await connections(user),
           settings: await readSettings(user),
-          generating: [...generating.keys()],
+          generating: [...generating.keys()].filter(isGenerating),
           health: { status: "ok" }
         };
       case "chat":
@@ -667,7 +693,7 @@ function start(api) {
   });
   let offPerm = null;
   try {
-    offPerm = api.permissions?.onChanged?.(() => service.onPermissionChanged());
+    offPerm = api.permissions?.onChanged?.((detail) => service.onPermissionChanged(detail));
   } catch {}
   service.attach();
   return () => {

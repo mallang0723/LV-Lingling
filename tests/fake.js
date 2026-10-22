@@ -112,6 +112,8 @@ export function fake(opts = {}) {
             setJson: async (path, v, o) => { store.set(o.userId + ':' + path, clone(v)); },
         },
         on(event, handler) {
+            // like the host: generation events are refused silently (no throw) without the `generation` permission
+            if (/^GENERATION_|^STREAM_/.test(event) && !api.permissions.has('generation')) return () => {};
             if (!handlers.has(event)) handlers.set(event, new Set());
             handlers.get(event).add(handler);
             return () => handlers.get(event).delete(handler);

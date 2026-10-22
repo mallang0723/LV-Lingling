@@ -193,3 +193,32 @@ test('backend entry: replies to the asking user and session; declares the tag ca
     assert.equal(f.sent.find(s => s.msg.requestId === 'q2').msg.ok, false);
     stop();
 });
+
+test('generation tracking survives a late grant of the permission, and a lost end event cannot lock the chat', async () => {
+    const f = fake({ deny: ['generation'] });
+    const s = createService(f.api);
+    s.attach();                                  // worker starts before anything is granted: subscriptions are refused
+    f.api.permissions.has = () => true;          // the user grants it afterwards
+    s.onPermissionChanged({ permission: 'generation', granted: true });
+    await s.run({ type: 'send', chatId: 'chat-a', text: 'x' }, U);
+    await wait(30);
+    assert.equal((await s.run({ type: 'latest', chatId: 'chat-a' }, U)).generating, false);
+    await s.run({ type: 'send', chatId: 'chat-a', text: '또' }, U);   // not locked out
+    // an end event that never arrives: the lock expires
+    f.state.holdReply = true;
+    await wait(30);
+    await s.run({ type: 'send', chatId: 'chat-a', text: '붙잡힘' }, U);
+    const realNow = Date.now;
+    Date.now = () => realNow() + 11 * 60 * 1000;
+    try { assert.equal((await s.run({ type: 'latest', chatId: 'chat-a' }, U)).generating, false); } finally { Date.now = realNow; }
+});
+
+test('first send subscribes lazily when no permission event ever arrived', async () => {
+    const f = fake({ deny: ['generation'] });
+    const s = createService(f.api);
+    s.attach();
+    f.api.permissions.has = () => true;          // granted while the worker was not told
+    await s.run({ type: 'send', chatId: 'chat-a', text: 'x' }, U);
+    await wait(30);
+    assert.equal((await s.run({ type: 'latest', chatId: 'chat-a' }, U)).generating, false);
+});
