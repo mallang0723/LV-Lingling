@@ -603,7 +603,7 @@ export function createStudio(deps) {
         async start(boot) {
             if (boot) { chat.generating = !!boot.generating?.includes?.(currentChat()); }
             await restore();
-            if (!destroyed) render();
+            if (!destroyed) { render(); scheduleInjection(); }   // standing context restored from a saved draft applies before the window is opened
             if (!hostLoaded && selected !== 'lorebook') loadLibrary();
         },
         chatChanged() { chat.generating = false; scheduleInjection(); render(); },
