@@ -440,7 +440,7 @@ function ur(e, t, n) {
 }
 function Ci(e, t) {
   return e.loadingHost
-    ? l("p", { className: "mcs-hint" }, "마리나라의 캐릭터·페르소나·로어북 목록을 불러오는 중입니다…")
+    ? l("p", { className: "mcs-hint" }, "루미버스의 캐릭터·페르소나·월드북 목록을 불러오는 중입니다…") // LV: Marinara -> Lumiverse wording
     : e.hostError
       ? l(
           "div",
@@ -779,7 +779,7 @@ function Oi(e, t) {
             { className: "mcs-final-section mcs-no-bottom-divider mcs-prepare-final-section" },
             tt(
               "RP방으로 넘기기",
-              Ee("제작 브리핑을 RP 입력창에 넣기", "send", t.prepareBriefingToChat, !!e.request),
+              t.canComposer ? Ee("제작 브리핑을 RP 입력창에 넣기", "send", t.prepareBriefingToChat, !!e.request) : null, // LV: needs ctx.composer
               Ee("브리핑 복사", "copy", t.copyBriefing),
             ),
             C("령령에게 바로 요청", { icon: "spark", wide: !0, onClick: t.prepareBriefingAndSend, disabled: !!e.request }),
@@ -860,7 +860,7 @@ function _i(e, t) {
         { className: "mcs-final-section" },
         tt(
           "최종본 요청",
-          Ee("최종본 요청문을 RP 입력창에 넣기", "send", t.exportRequestToChat),
+          t.canComposer ? Ee("최종본 요청문을 RP 입력창에 넣기", "send", t.exportRequestToChat) : null, // LV: needs ctx.composer
           Ee("최종본 요청문 복사", "copy", t.copyExportRequest),
         ),
         l(
@@ -1096,14 +1096,16 @@ function Li(e, t) {
         l(
           "span",
           { className: "mcs-revision-quick-actions" },
-          Ee(
-            "수정 요청을 입력창에 넣기",
-            "send",
-            (n) => {
-              (n.preventDefault(), n.stopPropagation(), t.revisionRequestToChat());
-            },
-            !!e.request,
-          ),
+          t.canComposer // LV: needs ctx.composer
+            ? Ee(
+                "수정 요청을 입력창에 넣기",
+                "send",
+                (n) => {
+                  (n.preventDefault(), n.stopPropagation(), t.revisionRequestToChat());
+                },
+                !!e.request,
+              )
+            : null,
           Ee(
             "수정 요청문 복사",
             "copy",
@@ -1201,7 +1203,7 @@ function Pi(e, t) {
       l(
         "div",
         { className: "mcs-final-section" },
-        l("h3", {}, "마리나라에 바로 저장"),
+        l("h3", {}, "루미버스에 바로 저장"), // LV: Marinara -> Lumiverse wording
         C(e.registeredCharacterId ? "등록 완료" : e.kind === "persona" ? "새 페르소나로 등록" : "새 캐릭터로 등록", {
           icon: "plusCharacter",
           onClick: t.registerCharacter,
@@ -1420,9 +1422,11 @@ function br(e, t) {
 }
 function Er(e, t) {
   return [
-    Ee("RP 입력창에 넣기", "send", (n) => {
-      (n.preventDefault(), n.stopPropagation(), e.request(t, "composer"));
-    }),
+    e.canComposer // LV: needs ctx.composer
+      ? Ee("RP 입력창에 넣기", "send", (n) => {
+          (n.preventDefault(), n.stopPropagation(), e.request(t, "composer"));
+        })
+      : null,
     Ee("요청문 복사", "copy", (n) => {
       (n.preventDefault(), n.stopPropagation(), e.request(t, "copy"));
     }),
@@ -1840,7 +1844,7 @@ function Ki(e, t) {
           ),
           Q(`완료 ${e.recovery.completed.length}건 · 마지막 작업: ${e.recovery.inFlight || e.recovery.completed.at(-1) || "확인 중"}`),
           Q(
-            "현재 작업을 임시 저장하고 Marinara 라이브러리에서 결과를 확인해 주세요. 필요하면 상단 초기화 버튼으로 로어북 제작실 작업을 초기화한 뒤 서버 원본을 다시 불러올 수 있습니다.",
+            "현재 작업을 임시 저장하고 루미버스의 월드북에서 결과를 확인해 주세요. 필요하면 상단 초기화 버튼으로 로어북 제작실 작업을 초기화한 뒤 서버 원본을 다시 불러올 수 있습니다.", // LV: Marinara -> Lumiverse wording
           ),
         )
       : null,
@@ -1849,7 +1853,7 @@ function Ki(e, t) {
       "div",
       { className: "mcs-completion-actions" },
       yr(
-        "마리나라에 바로 저장",
+        "루미버스에 바로 저장", // LV: Marinara -> Lumiverse wording
         C("새 로어북으로 등록", { icon: "book", disabled: !!n.length || !!e.recovery || i, onClick: () => t.save(!1) }),
         e.source ? C("원본 로어북에 저장", { icon: "save", disabled: !!n.length || !!e.recovery, onClick: () => t.save(!0) }) : null,
       ),
