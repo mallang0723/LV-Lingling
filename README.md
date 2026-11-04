@@ -6,7 +6,7 @@
 >
 > **라이선스·허락**: 원작 저장소에는 `LICENSE` 파일이 없습니다. 대신 원작자가 DCInside aifrontend 마이너 갤러리 게시글 「[시리즈] 말랑나라 제작 도우미 봇카드」에서 GitHub 링크를 **"(수정/재배포 가능)"** 이라고 밝혔고, 이 이식판은 그 허락에 따라 수정해 공개합니다. 이 저장소는 원작 부분에 별도의 라이선스를 만들거나 부여하지 않으며, 원작의 모든 권리는 원작자에게 있습니다. 자세한 고지와 원작에서 옮긴 부분의 목록은 [NOTICE](NOTICE)에 있습니다.
 >
-> 령령 **봇카드(`CharCard.json`)와 추가 이미지 ZIP은 이 저장소에 없습니다.** 원작 릴리스([v2.0.0](https://github.com/you2-use/lingling-studio/releases/tag/v2.0.0))에서 받으세요. 화면의 유령 이미지 1장(`assets/ghost.png`, `src/ghost.js`)만 그 릴리스의 `LinglingImage.zip` 속 `령령1.png`를 작게 줄여 넣었습니다(원작자의 릴리스 자료). 이미지를 빼도 동작하며 원작의 유령 아이콘으로 바뀝니다.
+> 루미버스용으로 변환한 령령 **봇카드는 이 저장소의 [릴리스 v2.0.0-lv.1](https://github.com/mallang0723/LV-Lingling/releases/tag/v2.0.0-lv.1)에서 받으세요**(`CharCard.lingling.png`). 원작 카드(`CharCard.json`)와 추가 이미지 ZIP은 원작 릴리스([v2.0.0](https://github.com/you2-use/lingling-studio/releases/tag/v2.0.0))에 있습니다. 화면의 유령 이미지 1장(`assets/ghost.png`, `src/ghost.js`)만 그 릴리스의 `LinglingImage.zip` 속 `령령1.png`를 작게 줄여 넣었습니다(원작자의 릴리스 자료). 이미지를 빼도 동작하며 원작의 유령 아이콘으로 바뀝니다.
 
 령령(봇카드)과 대화하며 **캐릭터·페르소나·로어북(월드북)** 을 만들고, 고치고, 루미버스에 저장하는 확장입니다. 제작·수정 요청을 지금 열려 있는 채팅(령령 방)에 보내고, 령령의 마지막 답변을 읽어 와 편집 화면에 반영합니다.
 
@@ -22,6 +22,8 @@
 7. **4 최종** — **새 항목으로 등록**하거나 편집 모드에서는 **원본에 저장**. JSON 파일 저장·전체 복사도 됩니다.
 
 ## 령령 카드 가져오기
+
+**가장 쉬운 방법:** [릴리스 v2.0.0-lv.1](https://github.com/mallang0723/LV-Lingling/releases/tag/v2.0.0-lv.1)에서 `CharCard.lingling.png`를 받아 아래 1번부터 따라 하세요. 아래 변환은 원작 카드로 직접 만들고 싶을 때만 필요합니다.
 
 원작 릴리스의 `CharCard.json`은 **Marinara 내보내기 형식**(`{"type":"marinara_character", …, "data": {"spec":"chara_card_v2", …}}`)이라 Lumiverse 1.2.5에 그대로 가져오면 실패합니다. Lumiverse의 가져오기는 파일 **맨 위**에서 `spec: "chara_card_v2"`를 찾는데(`parseCardJson`), 이 파일은 한 겹 감싸여 있어서 "Character card is missing required 'name' field"가 납니다. ✅ 호스트 소스(v1.2.5)에서 확인.
 
